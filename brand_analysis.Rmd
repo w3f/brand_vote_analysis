@@ -1,0 +1,43 @@
+---
+title: "Brand Analysis"
+author: "Jonas Gehrlein"
+date: "10/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+df <-read.csv("~/Documents/Projects/brand_analysis/brand_results.csv")
+normalization <- 1/10000000000
+
+# Some accounts have no Balance because they had no balance at the snapshot and their voting power is 0
+df$Balance <- ifelse(is.na(df$Balance),0, df$Balance)
+
+
+# Normalize to DOTs
+df$Balance <- df$Balance*normalization
+
+# Take square root of balance to account for quadratic voting
+df$sqrt_balance <- sqrt(df$Balance)
+```
+
+```{r, echo=FALSE}
+df$result_identity_A <- df$sqrt_balance * df$Identity.A
+df$result_identity_B <- df$sqrt_balance * df$Identity.B
+
+df$result_logo_A <- df$sqrt_balance * df$Logo.A
+df$result_logo_B <- df$sqrt_balance * df$Logo.B
+
+sum_identity_A <- sum(df$result_identity_A)
+sum_identity_B <- sum(df$result_identity_B)
+
+sum_logo_A <- sum(df$result_logo_A)
+sum_logo_B <- sum(df$result_logo_B)
+```
+
+|          | A              | B              |
+|----------|----------------|----------------|
+| Identity |  `r format(sum_identity_A, scientific=FALSE, big.mark=",")` DOT              |    `r format(sum_identity_B, scientific=FALSE, big.mark=",")` DOT            |
+| Logo     | `r format(sum_logo_A, scientific=FALSE, big.mark=",")` DOT | `r format(sum_logo_B, scientific=FALSE, big.mark=",")` DOT |
+
+
