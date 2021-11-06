@@ -1,7 +1,7 @@
 ---
 title: "Brand Analysis"
 author: "Jonas Gehrlein"
-date: "11/04/2021"
+date: "11/06/2021"
 output: html_document
 ---
 
@@ -48,38 +48,70 @@ sum_logo_B <- sum(df$result_logo_B)
 
 logo_B_share <- sum_logo_B / (sum_logo_A + sum_logo_B)
 logo_A_share <- sum_logo_A / (sum_logo_A + sum_logo_B)
-
-
 ```
-
-```{r, echo=FALSE}
-identity_certain <- nrow(subset(df, Identity.A == 1 | df$Identity.A == 0))
-identity_tendency <- nrow(subset(df, Identity.A == 0.25 | Identity.A == 0.75))
-identity_uncertain <- nrow(subset(df, Identity.A == 0.5))
-
-
-logo_certain <- nrow(subset(df, Logo.A == 1 | df$Logo.A == 0))
-logo_tendency <- nrow(subset(df, Logo.A == 0.25 | Logo.A == 0.75))
-logo_uncertain <- nrow(subset(df, Logo.A == 0.5))
-
-```
-
-
-# Results
 
 ## Voting results
 
 A total sum of `r (format(sum(df$Balance), scientific=FALSE, big.mark=","))` DOT has been used during the voting process by `r nrow(df)` accounts. Due to the quadratic voting mechanism, the overall voting power equals `r (format(sum(df$sqrt_balance), scientific=FALSE, big.mark=","))` VP. 
 
+### Quadratic Voting
+
+The following table shows the *weighted square root balances* that support the two different identities and logos, which can be considered as Voting Power (VP).
 
 |          | A              | B              |
 |----------|----------------|----------------|
 | Identity |  `r format(sum_identity_A, scientific=FALSE, big.mark=",")` VP  (`r format(identity_A_share*100,digits=2)`%)            |    `r format(sum_identity_B, scientific=FALSE, big.mark=",")` VP  (`r format(identity_B_share*100, digits=2)`%)           |
 | Logo     | `r format(sum_logo_A, scientific=FALSE, big.mark=",")` VP (`r format(logo_A_share*100,digits=2)`%) | `r format(sum_logo_B, scientific=FALSE, big.mark=",")` VP (`r format(logo_B_share*100,digits=2)`%)  |
 
-The table shows the weighted square root balances that support the two different identities and logos, which can be considered as Voting Power (VP). 
 
-## Certainty
+
+### Raw Balance Voting
+
+The following table shows the *DOT balances* that support the two different identities and logos.
+
+```{r, echo=FALSE}
+# Weigh the square root balances (voting power) with the assigned voting weight.
+df$result_identity_A_raw <- df$Balance * df$Identity.A
+df$result_identity_B_raw <- df$Balance * df$Identity.B
+
+df$result_logo_A_raw <- df$Balance * df$Logo.A
+df$result_logo_B_raw <- df$Balance * df$Logo.B
+
+
+# Sum the square root balances that support the different campaigns.
+sum_identity_A_raw <- sum(df$result_identity_A_raw)
+sum_identity_B_raw <- sum(df$result_identity_B_raw)
+
+identity_B_share_raw <- sum_identity_B_raw / (sum_identity_A_raw + sum_identity_B_raw)
+identity_A_share_raw <- sum_identity_A_raw / (sum_identity_A_raw + sum_identity_B_raw)
+
+sum_logo_A_raw <- sum(df$result_logo_A_raw)
+sum_logo_B_raw <- sum(df$result_logo_B_raw)
+
+logo_B_share_raw <- sum_logo_B_raw / (sum_logo_A_raw + sum_logo_B_raw)
+logo_A_share_raw <- sum_logo_A_raw / (sum_logo_A_raw + sum_logo_B_raw)
+```
+
+
+|          | A              | B              |
+|----------|----------------|----------------|
+| Identity |  `r format(sum_identity_A_raw, scientific=FALSE, big.mark=",")` DOT  (`r format(identity_A_share_raw*100,digits=2)`%)            |    `r format(sum_identity_B_raw, scientific=FALSE, big.mark=",")` DOT  (`r format(identity_B_share_raw*100, digits=2)`%)           |
+| Logo     | `r format(sum_logo_A_raw, scientific=FALSE, big.mark=",")` DOT (`r format(logo_A_share_raw*100,digits=2)`%) | `r format(sum_logo_B_raw, scientific=FALSE, big.mark=",")` DOT (`r format(logo_B_share_raw*100,digits=0)`%)  |
+
+```{r, echo=FALSE}
+# If a user voted for Identity with 1 or 0 (to account for both possible votes), their opinion is considered certain. If it is 0.25 or 0.75 it is considered medium and 0.5 is indifferent
+identity_certain <- nrow(subset(df, Identity.A == 1 | Identity.A == 0))
+identity_tendency <- nrow(subset(df, Identity.A == 0.25 | Identity.A == 0.75))
+identity_uncertain <- nrow(subset(df, Identity.A == 0.5))
+
+
+logo_certain <- nrow(subset(df, Logo.A == 1 | Logo.A == 0))
+logo_tendency <- nrow(subset(df, Logo.A == 0.25 | Logo.A == 0.75))
+logo_uncertain <- nrow(subset(df, Logo.A == 0.5))
+
+```
+
+### Voting weights
 
 The following table shows how many voters selected the different weight options available. A vote with a weight of 100% (in any direction) is counted as a *Strong* opinion. A vote of 75% (in any direction) is counted as *Medium* opinion and a vote with weights of 50% is considered an *Indifferent* opinion.
 
