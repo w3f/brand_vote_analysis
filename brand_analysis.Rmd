@@ -7,18 +7,16 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-df <-read.csv("~/Documents/Projects/brand_analysis/filtered.csv")
+df <-read.csv("filtered.csv")
+
+# Set normalization parameter of Planck to DOT
 normalization <- 1/10000000000
 
-# Some accounts have no Balance because they had no balance at the snapshot and their voting power is 0
-df$Balance <- ifelse(is.na(df$Balance),0, df$Balance)
-
+# Normalize to %
 df$Identity.A <- df$Identity.A / 100
 df$Identity.B <- df$Identity.B / 100
-
 df$Logo.A <- df$Logo.A / 100
 df$Logo.B <- df$Logo.B / 100
-
 
 # Normalize to DOTs
 df$Balance <- df$Balance*normalization
@@ -40,6 +38,7 @@ df$result_logo_B <- df$sqrt_balance * df$Logo.B
 sum_identity_A <- sum(df$result_identity_A)
 sum_identity_B <- sum(df$result_identity_B)
 
+# Calculate the respective shares
 identity_B_share <- sum_identity_B / (sum_identity_A + sum_identity_B)
 identity_A_share <- sum_identity_A / (sum_identity_A + sum_identity_B)
 
@@ -70,6 +69,8 @@ The following table shows the *weighted square root balances* that support the t
 The following table shows the *DOT balances* that support the two different identities and logos.
 
 ```{r, echo=FALSE}
+# Do the same analysis as above but use raw balances.
+
 # Weigh the square root balances (voting power) with the assigned voting weight.
 df$result_identity_A_raw <- df$Balance * df$Identity.A
 df$result_identity_B_raw <- df$Balance * df$Identity.B
@@ -99,7 +100,7 @@ logo_A_share_raw <- sum_logo_A_raw / (sum_logo_A_raw + sum_logo_B_raw)
 | Logo     | `r format(sum_logo_A_raw, scientific=FALSE, big.mark=",")` DOT (`r format(logo_A_share_raw*100,digits=2)`%) | `r format(sum_logo_B_raw, scientific=FALSE, big.mark=",")` DOT (`r format(logo_B_share_raw*100,digits=0)`%)  |
 
 ```{r, echo=FALSE}
-# If a user voted for Identity with 1 or 0 (to account for both possible votes), their opinion is considered certain. If it is 0.25 or 0.75 it is considered medium and 0.5 is indifferent
+# If a user voted with a weight of 1 or 0 (to account for both possible votes), their opinion is considered certain. If it is 0.25 or 0.75 it is considered medium and 0.5 is indifferent
 identity_certain <- nrow(subset(df, Identity.A == 1 | Identity.A == 0))
 identity_tendency <- nrow(subset(df, Identity.A == 0.25 | Identity.A == 0.75))
 identity_uncertain <- nrow(subset(df, Identity.A == 0.5))
